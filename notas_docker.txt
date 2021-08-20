@@ -1,0 +1,8 @@
+docker run -e DISPLAY = $ DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix/ --name social_distancing_ai
+
+
+docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix/ --name python social_distancing_ai
+
+docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw --name python social_distancing_ai
+
+docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw  social_distancing_ai

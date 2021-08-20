@@ -1,0 +1,14 @@
+numpy 
+scipy 
+h5py
+scikit-learn 
+Pillow 
+imutils
+beautifulsoup4
+keras
+keras-resnet
+opencv-python
+tk
+setuptools
+cython
+
