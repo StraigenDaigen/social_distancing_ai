@@ -73,6 +73,9 @@
 
 # Use
     - python video_detection.py --video <video_test> --output <optional output filename>
+
+ ![](https://github.com/StraigenDaigen/social_distancing_ai/blob/main/top_view.PNG)
+
     - Go to the GUI directory.
         - python gui.py
         
