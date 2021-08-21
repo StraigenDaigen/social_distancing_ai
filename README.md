@@ -18,8 +18,8 @@
 
 
 # Sample 
-![](https://i.ibb.co/2YNMgcd/campanario-out.gif)
-![Alt Text](https://i.ibb.co/2YNMgcd/campanario-out.gif)
+
+	![](https://i.ibb.co/2YNMgcd/campanario-out.gif)
 
 # Instructions 
 - Download the weights from this link https://drive.google.com/drive/folders/1DUk-Hg3ZYAFzi8fyKZpfITzNhsdzfPWp?usp=sharing and put it in the main folder
