@@ -14,6 +14,11 @@
 - Using Keras Retinanet as people detector 
 - People counter in real time 
 
+### Methodology 
+- spanish version: 
+	- https://drive.google.com/file/d/1M8MT_DuOBnvMKLVZ6aCwsLRCDFu-J-Wr/view?usp=sharing
+- english version:
+	- soon...
 
 
 
