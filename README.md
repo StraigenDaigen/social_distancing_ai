@@ -19,7 +19,7 @@
 
 # Sample 
 
-![](https://i.ibb.co/2YNMgcd/campanario-out.gif)
+![Project running](https://i.ibb.co/2YNMgcd/campanario-out.gif)
 
 # Instructions 
 - Download the weights from this link https://drive.google.com/drive/folders/1DUk-Hg3ZYAFzi8fyKZpfITzNhsdzfPWp?usp=sharing and put it in the main folder
