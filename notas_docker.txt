@@ -6,3 +6,8 @@ docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix/ --name python 
 docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw --name python social_distancing_ai
 
 docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw  social_distancing_ai
+
+
+docker build -t social_distancing_ai .
+
+set-variable -name DISPLAY -value 172.19.224.1:0.0
