@@ -71,7 +71,7 @@
     - Go to the GUI directory.
         - python gui.py
         
- ![](https://i.ibb.co/mtYrPqM/gui-image.png)
+ ![](https://github.com/StraigenDaigen/social_distancing_ai/blob/main/gui_image.PNG)
 
 ### Notes
 - This project has been configured to works in the known place (we know the real area size). Please, if you want to use it, you need to change the area of interest points inside the code to have an accurate precision. Maybe in the future, we could add an interactive interface to add parameters to define the area of interest according to any situation. 
