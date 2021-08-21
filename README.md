@@ -1,7 +1,3 @@
-# social_distancing_ai
-Social Distancing project using Computer Vision and AI 
-
-
 ### Technologies
 - Python
 - Docker
@@ -26,6 +22,7 @@ Social Distancing project using Computer Vision and AI
 ![](https://i.ibb.co/2YNMgcd/campanario-out.gif)
 
 # Instructions 
+- Download the weights from this link https://drive.google.com/drive/folders/1DUk-Hg3ZYAFzi8fyKZpfITzNhsdzfPWp?usp=sharing and put it in the main folder
 - There are 2 ways to use this project: 
     - Install all requirements locally.
     - Use dockerfile or the image in docker hub.
@@ -78,6 +75,7 @@ Social Distancing project using Computer Vision and AI
 
 ### Notes
 - This project has been configured to works in the known place (we know the real area size). Please, if you want to use it, you need to change the area of interest points inside the code to have an accurate precision. Maybe in the future, we could add an interactive interface to add parameters to define the area of interest according to any situation. 
+- You should have NVIDIA GPU with CUDA installed in your os system to run docker image with GPU. If you have windows, you need to follow this guide https://drive.google.com/drive/folders/1DUk-Hg3ZYAFzi8fyKZpfITzNhsdzfPWp?usp=sharing
 
     
 
