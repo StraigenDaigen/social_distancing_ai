@@ -18,7 +18,6 @@
 
 
 # Sample 
-
 ![](https://i.ibb.co/2YNMgcd/campanario-out.gif)
 
 # Instructions 
