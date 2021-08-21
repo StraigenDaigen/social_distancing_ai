@@ -19,7 +19,7 @@
 
 # Sample 
 
-![Project running](https://github.com/StraigenDaigen/social_distancing_ai/campanario-out.gif)
+![Project running](https://github.com/StraigenDaigen/social_distancing_ai/blob/main/campanario_out.gif)
 
 # Instructions 
 - Download the weights from this link https://drive.google.com/drive/folders/1DUk-Hg3ZYAFzi8fyKZpfITzNhsdzfPWp?usp=sharing and put it in the main folder
