@@ -73,7 +73,9 @@
 
 # Use
     - python video_detection.py --video <video_test> --output <optional output filename>
+    - use your mouse left click to select 4 points (top left, top right, bottom right, bottom left) for your area of interest in the video. 
 
+ ![](https://github.com/StraigenDaigen/social_distancing_ai/blob/main/area_of_interest.PNG)
  ![](https://github.com/StraigenDaigen/social_distancing_ai/blob/main/top_view.PNG)
 
     - Go to the GUI directory.
