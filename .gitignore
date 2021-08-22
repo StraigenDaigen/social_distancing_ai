@@ -42,7 +42,6 @@ Thumbs.db
 
 # Large media files
 *.tiff
-*.avi
 *.flv
 *.mov
 *.wmv

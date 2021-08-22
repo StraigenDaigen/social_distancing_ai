@@ -47,7 +47,7 @@ ap.add_argument("-v", "--video",
     help = "path to the (optional) video file")
 ap.add_argument("-o", "--output", type=str, default="",
     help="path to (optional) output video file")
-ap.add_argument("-f", "--frames", type=int, default=50,
+ap.add_argument("-f", "--frames", type=int, default=20,
     help="Frames per prediction")
 args = vars(ap.parse_args())
 
@@ -76,31 +76,41 @@ LABELS = {int(L.split(",")[1]): L.split(",")[0] for L in LABELS}
 
 # load the model from disk
 model = models.load_model(model_dir, backbone_name="resnet50")
+circles = np.zeros((4,2), np.int32)
+counter = 0
 
+#print(circles)
 
-area_real_pts = np.array([[265,69],[402,64],[673,374],[43,396]])
-    
-#Valores para centrar el mapa en la ventana
-w_mapa_1 = int((800/2)+(200))#(1266/4))
-w_mapa_2 = int((800/2)-(200))#(1266/4))
-
-area_mapa_pts = np.array([[w_mapa_2,0],[w_mapa_1,0],[w_mapa_1,448],[w_mapa_2,448]])
-    
-
-    
-#PERPECTIVE TRANSFORM Y WARP PERSPECTIVE
-    
-src_pts = np.array([[265,69],[402,64],[673,374],[43,396]], dtype=np.float32)
-dst_pts = np.array([[w_mapa_2,0],[w_mapa_1,0],[w_mapa_1,710],[w_mapa_2,710]], dtype=np.float32)
-    
-M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+def mousePoints(event, x, y,flags, parameters):
+    global circles, counter
+    if event == cv2.EVENT_LBUTTONDOWN:
+        #print(x, y)
+        circles[counter] = x, y
+        counter = counter + 1
+        time.sleep(3)
+        
+        #print(circles)  
 
 
 
 c=0
+
+area_defined = False
+
+
+
+
+
+
+
+
+
+
 # keep looping
 while True:
-    
+    #########################################################
+
+
     s = time.time()
     # grab the current frame
     (grabbed, frame) = vs.read()
@@ -114,143 +124,185 @@ while True:
     # resize the frame and convert it to grayscale
     frame = imutils.resize(frame, width = 800)
 
-    #Circle in the publicity to avoid detect a fake person.
-    frame = cv2.circle(frame,(355,109),8,(205,205,205),-1)
-    if c>args["frames"]:
-    
-        c=0
-        s = time.time() 
-        # resize the frame and convert it to grayscale
-        #frame = imutils.resize(frame, width = 800)
+    for x in range(0,4):
+        cv2.circle(frame, (circles[x][0], circles[x][1]), 3, (0, 255, 0), cv2.FILLED)
         
-        imgAux = np.zeros(shape=(frame.shape[:2]),dtype=np.uint8)
-        #imgAux = cv2.drawContours(imgAux,[area_mapa_pts],-1,(255),-1) 
-        imgAux = cv2.drawContours(imgAux,[area_real_pts],-1,(255),-1)
-        warp = cv2.warpPerspective(imgAux, M, (w_mapa_1+w_mapa_2, 710))
-        
-        image_test= cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        # load the input image (in BGR order), clone it, and preprocess it
-        image = image_test
-        output = image.copy()
-        image = preprocess_image(image)
-        (image, scale) = resize_image(image)
-        image = np.expand_dims(image, axis=0)
+    cv2.imshow("Original image", frame)
+    cv2.setMouseCallback("Original image", mousePoints)
+    cv2.waitKey(1)
 
-        print("tiempo de pre procesado: {}".format(time.time()-s))
-        
-        s = time.time()
-        # detect objects in the input image and correct for the image scale
-        (boxes, scores, labels) = model.predict_on_batch(image)
-        boxes /= scale
-        print("tiempo de predicción: {}".format(time.time()-s))
+    if counter < 4:
+        time.sleep(1)
+    ##################### area of interest #################
+    if counter>=4:
+       
+        width, height = frame.shape[:2]
 
-        
-        puntos_real=[]
-        puntos_p=[]
-        cantidad_personas=0
-        # loop over the detections
-        for (box, score, label) in zip(boxes[0], scores[0], labels[0]):
-            # filter out weak detections
-            if score < min_confidence:
-                continue
-        
-            # convert the bounding box coordinates from floats to integers
-            box = box.astype("int")
-        
-            # build the label and draw the label + bounding box on the output
-            # image
-            label = "{}: {:.2f}".format(LABELS[label], score)
-            cv2.rectangle(output, (box[0], box[1]), (box[2], box[3]),
-                (0, 255, 0), 2)
-            #Obtener punto central inferior del bounding box
-            pto_x = box[0]+((box[2]-box[0])/2)
-            pto_y = box[3]
-            p_real=(int(pto_x),pto_y)
-            #print(p_real)
-            puntos_real.append(p_real)
+
+        area_real_pts = np.array([circles[0],circles[1],circles[2],circles[3]])
             
-            cv2.circle(output,(int(pto_x),pto_y),5,(0,0,255),-1)
-            cv2.putText(output, label, (box[0], box[1] - 10),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        #Valores para centrar el mapa en la ventana
+        w_mapa_1 = int((800/2)+(200))#(1266/4))
+        w_mapa_2 = int((800/2)-(200))#(1266/4))
+
+        area_mapa_pts = np.array([[w_mapa_2,0],[w_mapa_1,0],[w_mapa_1,448],[w_mapa_2,448]])
+            
 
             
-            p_mapa_x = (M[0][0]*pto_x + M[0][1]*pto_y + M[0][2]) / ((M[2][0]*pto_x + M[2][1]*pto_y + M[2][2]))
-            p_mapa_y = (M[1][0]*pto_x + M[1][1]*pto_y + M[1][2]) / ((M[2][0]*pto_x + M[2][1]*pto_y + M[2][2]))
-            p_mapa = (int(p_mapa_x),int(p_mapa_y))
-            cv2.circle(warp, p_mapa,5,(0,255,0),-1)
-            puntos_p.append(p_mapa)
-            cantidad_personas +=1
-        
-        if len(puntos_p)>1:
-        
-
-            for punto1, punto2 in itertools.combinations(puntos_p, 2): 
-                s = time.time()
-                x_p_trans = puntos_p.index(punto1)
-                y_p_trans = puntos_p.index(punto2)
-                cv2.line(output, puntos_real[x_p_trans], puntos_real[y_p_trans], [133, 133, 133], 1) 
-                distancia=dist.euclidean(punto1,punto2)
-                #print("PUNTO 1: "+str(point1)+" PUNTO 2: "+str(point2)+" DISTANCIA: "+str(distancia))
-                
-                if distancia < 75:
-                    #print(x_p_trans,' ',y_p_trans)
-                    cv2.line(output, puntos_real[x_p_trans], puntos_real[y_p_trans], [255, 0, ], 2) 
-                    (alto, ancho)=output.shape[:2]
-                    peligro="PELIGRO DE CONTAGIO"
-                    cv2.putText(output, peligro, (int(alto*0.55), int(ancho*0.55)),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
-
-                print("tiempo de comparar todas las distancias: {}".format(time.time()-s))
-
-                    
-        #Cantidad de personas
-        aforo="Aforo: " + str(cantidad_personas)
-        cv2.putText(output, aforo, (int(alto*0.1), int(ancho*0.55)),
-            cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
+        #PERPECTIVE TRANSFORM Y WARP PERSPECTIVE
             
-        
-        image_rgb=cv2.cvtColor(output,cv2.COLOR_BGR2RGB)
-    
-        # show our detected people     
-        
-        warpr = ResizeWithAspectRatio(warp, width=420)
-        cv2.drawContours(image_rgb,[area_real_pts],-1,(0,0,0),2)    
-        cv2.imshow("CONTROL DE DISTANCIAMIENTO SOCIAL", image_rgb)
+        src_pts = np.array([circles[0],circles[1],circles[2],circles[3]], dtype=np.float32)
+        dst_pts = np.array([[w_mapa_2,0],[w_mapa_1,0],[w_mapa_1,710],[w_mapa_2,710]], dtype=np.float32)
+            
+        M = cv2.getPerspectiveTransform(src_pts, dst_pts)
 
-        cv2.imshow("MAPA DEL PLANO (Top view)",warpr)
+        #imgOutput = cv2.warpPerspective(frame, M, (width, height))
+        #cv2.imshow("Output image", imgOutput)
+        area_defined=True
 
         
-        puntos_real.clear()
-        puntos_p.clear()
-        
-        #time.sleep(0)
-        #cv2.imshow("VIDEO REAL", frame)
 
-        key = cv2.waitKey(1) & 0xFF
-    
-        # if the `q` key was pressed, break from the loop
-        if key == ord("q") or key==27:
-            break
+
+
+        #Circle in the publicity to avoid detect a fake person.
+        #frame = cv2.circle(frame,(355,109),8,(205,205,205),-1)
+        if c>args["frames"]:
         
-        if args["output"] != "" and writer is None:
-            # initialize our video writer
+            c=0
+            s = time.time() 
+            # resize the frame and convert it to grayscale
+            #frame = imutils.resize(frame, width = 800)
+            
+            imgAux = np.zeros(shape=(frame.shape[:2]),dtype=np.uint8)
+            #imgAux = cv2.drawContours(imgAux,[area_mapa_pts],-1,(255),-1) 
+            imgAux = cv2.drawContours(imgAux,[area_real_pts],-1,(255),-1)
+            warp = cv2.warpPerspective(imgAux, M, (w_mapa_1+w_mapa_2, 710))
+            
+            image_test= cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            # load the input image (in BGR order), clone it, and preprocess it
+            image = image_test
+            output = image.copy()
+            image = preprocess_image(image)
+            (image, scale) = resize_image(image)
+            image = np.expand_dims(image, axis=0)
+
+            (alto, ancho)=output.shape[:2]
+
+            print("tiempo de pre procesado: {}".format(time.time()-s))
+            
             s = time.time()
-            fourcc = cv2.VideoWriter_fourcc(*"XVID")
-            writer = cv2.VideoWriter(args["output"], fourcc, 10,
-                (image_rgb.shape[1], image_rgb.shape[0]), True)
-            print("tiempo de escritura del video: {}".format(time.time()-s))
+            # detect objects in the input image and correct for the image scale
+            (boxes, scores, labels) = model.predict_on_batch(image)
+            boxes /= scale
+            print("tiempo de predicción: {}".format(time.time()-s))
 
-        # if the video writer is not None, write the frame to the output
-        # video file
+            
+            puntos_real=[]
+            puntos_p=[]
+            cantidad_personas=0
+            # loop over the detections
+            for (box, score, label) in zip(boxes[0], scores[0], labels[0]):
+                # filter out weak detections
+                if score < min_confidence:
+                    continue
+            
+                # convert the bounding box coordinates from floats to integers
+                box = box.astype("int")
+            
+                # build the label and draw the label + bounding box on the output
+                # image
+                label = "{}: {:.2f}".format(LABELS[label], score)
+                cv2.rectangle(output, (box[0], box[1]), (box[2], box[3]),
+                    (0, 255, 0), 2)
+                #Obtener punto central inferior del bounding box
+                pto_x = box[0]+((box[2]-box[0])/2)
+                pto_y = box[3]
+                p_real=(int(pto_x),pto_y)
+                #print(p_real)
+                puntos_real.append(p_real)
+                
+                cv2.circle(output,(int(pto_x),pto_y),5,(0,0,255),-1)
+                cv2.putText(output, label, (box[0], box[1] - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-        if args["output"] != "":
-            if writer is not None:
-                writer.write(image_rgb)
+                
+                p_mapa_x = (M[0][0]*pto_x + M[0][1]*pto_y + M[0][2]) / ((M[2][0]*pto_x + M[2][1]*pto_y + M[2][2]))
+                p_mapa_y = (M[1][0]*pto_x + M[1][1]*pto_y + M[1][2]) / ((M[2][0]*pto_x + M[2][1]*pto_y + M[2][2]))
+                p_mapa = (int(p_mapa_x),int(p_mapa_y))
+                cv2.circle(warp, p_mapa,5,(0,255,0),-1)
+                puntos_p.append(p_mapa)
+                cantidad_personas +=1
+            
+            if len(puntos_p)>1:
+            
 
-    else:
-        c += 1
+                for punto1, punto2 in itertools.combinations(puntos_p, 2): 
+                    s = time.time()
+                    x_p_trans = puntos_p.index(punto1)
+                    y_p_trans = puntos_p.index(punto2)
+                    #cv2.line(output, puntos_real[x_p_trans], puntos_real[y_p_trans], [133, 133, 133], 1) 
+                    distancia=dist.euclidean(punto1,punto2)
+                    #print("PUNTO 1: "+str(point1)+" PUNTO 2: "+str(point2)+" DISTANCIA: "+str(distancia))
+                    
+                    if distancia < 20:
+                        #print(x_p_trans,' ',y_p_trans)
+                        cv2.line(output, puntos_real[x_p_trans], puntos_real[y_p_trans], [255, 0, ], 2) 
+                        
+                        peligro="PELIGRO DE CONTAGIO"
+                        cv2.putText(output, peligro, (int(alto*0.55), int(ancho*0.55)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
+
+                    print("tiempo de comparar todas las distancias: {}".format(time.time()-s))
+
+                        
+            #Cantidad de personas
+            aforo="Aforo: " + str(cantidad_personas)
+            cv2.putText(output, aforo, (int(alto*0.1), int(ancho*0.55)),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
+                
+            
+            image_rgb=cv2.cvtColor(output,cv2.COLOR_BGR2RGB)
         
+            # show our detected people     
+            
+            warpr = ResizeWithAspectRatio(warp, width=420)
+            cv2.drawContours(image_rgb,[area_real_pts],-1,(0,0,0),2)    
+            cv2.imshow("CONTROL DE DISTANCIAMIENTO SOCIAL", image_rgb)
+
+            cv2.imshow("MAPA DEL PLANO (Top view)",warpr)
+
+            
+            puntos_real.clear()
+            puntos_p.clear()
+            
+            #time.sleep(0)
+            #cv2.imshow("VIDEO REAL", frame)
+
+            key = cv2.waitKey(1) & 0xFF
         
+            # if the `q` key was pressed, break from the loop
+            if key == ord("q") or key==27:
+                break
+            
+            if args["output"] != "" and writer is None:
+                # initialize our video writer
+                s = time.time()
+                fourcc = cv2.VideoWriter_fourcc(*"XVID")
+                writer = cv2.VideoWriter(args["output"], fourcc, 10,
+                    (image_rgb.shape[1], image_rgb.shape[0]), True)
+                print("tiempo de escritura del video: {}".format(time.time()-s))
+
+            # if the video writer is not None, write the frame to the output
+            # video file
+
+            if args["output"] != "":
+                if writer is not None:
+                    writer.write(image_rgb)
+
+        else:
+            c += 1
+            
+            
 
     
 
